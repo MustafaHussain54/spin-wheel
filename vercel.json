@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://spin-wheel-cvd9.onrender.com/api/$1"
+    },
+    {
+      "source": "/visitor/(.*)",
+      "destination": "https://spin-wheel-cvd9.onrender.com/api/visitor/$1"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "https://spin-wheel-cvd9.onrender.com/api/admin/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
