@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// In production on Vercel, requests use VITE_API_BASE_URL.
-// In local development, it defaults to '/api' which Vite proxies to localhost:5000.
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+// Explicitly use the live Render backend URL, with fallback to env or relative path
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://spin-wheel-cvd9.onrender.com/api';
 
 const api = axios.create({
   baseURL
