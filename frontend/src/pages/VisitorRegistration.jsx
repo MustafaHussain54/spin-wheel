@@ -245,8 +245,45 @@ export default function VisitorRegistration() {
           </button>
         </form>
 
+        {/* Client Instagram Follow Banner & QR Card */}
+        <div className="mt-5 p-3.5 bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50 rounded-2xl border border-rose-200/60 flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex-1">
+            <span className="inline-block text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-full bg-rose-500 text-white mb-1">
+              Follow Us
+            </span>
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+              Connect on Instagram
+            </h3>
+            <p className="text-[11px] text-slate-600 mt-0.5">
+              Scan QR or tap to follow <span className="font-semibold text-rose-600">@jaliwala_innovations</span>
+            </p>
+            <a
+              href="https://www.instagram.com/jaliwala_innovations/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-2 text-[11px] font-bold text-rose-700 hover:text-rose-800 underline"
+            >
+              Open Profile &rarr;
+            </a>
+          </div>
+
+          <a
+            href="https://www.instagram.com/jaliwala_innovations/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1 bg-white rounded-xl shadow-xs border border-rose-200/80 hover:scale-105 transition-transform flex-shrink-0"
+            title="Scan to open @jaliwala_innovations Instagram"
+          >
+            <img
+              src="/jaliwala-instagram-qr.jpg"
+              alt="@jaliwala_innovations Instagram QR"
+              className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-lg"
+            />
+          </a>
+        </div>
+
         {/* Security / Kiosk Policy Badge */}
-        <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-center gap-1.5 text-slate-500 text-xs text-center">
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-slate-500 text-xs text-center">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
           <span>Fair Play: 1 Spin per verified registration</span>
         </div>
