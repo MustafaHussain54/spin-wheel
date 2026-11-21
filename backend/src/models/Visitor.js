@@ -34,6 +34,11 @@ const VisitorSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
+  instagramHandle: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   hasSpun: {
     type: Boolean,
     default: false,

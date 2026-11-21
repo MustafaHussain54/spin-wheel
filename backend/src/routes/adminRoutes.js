@@ -289,6 +289,7 @@ router.get('/visitors/export', authMiddleware, async (req, res) => {
       'Email Address': v.email || 'N/A',
       'Company / Organization': v.company || 'N/A',
       'City': v.city || 'N/A',
+      'Instagram Handle': v.instagramHandle ? `@${v.instagramHandle}` : 'N/A',
       'Spin Status': v.hasSpun ? 'Spun' : 'Pending',
       'Prize Won': v.prizeWon?.prizeName || 'None',
       'Prize Category': v.prizeWon?.category || 'N/A',

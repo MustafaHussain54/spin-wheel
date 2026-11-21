@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Phone, Mail, Building, MapPin, Sparkles, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Phone, Mail, Building, MapPin, Sparkles, AlertCircle, ArrowRight, ShieldCheck, AtSign } from 'lucide-react';
 import api from '../services/api';
 
 export default function VisitorRegistration() {
@@ -10,7 +10,8 @@ export default function VisitorRegistration() {
     mobileNumber: '',
     email: '',
     company: '',
-    city: ''
+    city: '',
+    instagramHandle: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -153,21 +154,40 @@ export default function VisitorRegistration() {
             )}
           </div>
 
-          {/* Email Address */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
-              Email Address <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="email"
-                name="email"
-                placeholder="rahul@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm transition-all"
-              />
+          {/* Email Address & Instagram Handle Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="rahul@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                Instagram Handle <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <div className="relative">
+                <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  name="instagramHandle"
+                  placeholder="@yourhandle"
+                  value={formData.instagramHandle}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 text-sm transition-all"
+                />
+              </div>
             </div>
           </div>
 

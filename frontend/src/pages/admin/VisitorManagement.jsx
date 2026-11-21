@@ -319,6 +319,25 @@ export default function VisitorManagement() {
                 <span className="text-slate-400 block">Company:</span>
                 <span className="text-slate-700">{selectedVisitor.company || 'N/A'}</span>
               </div>
+              <div>
+                <span className="text-slate-400 block">City:</span>
+                <span className="text-slate-700">{selectedVisitor.city || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block">Instagram:</span>
+                <span className="text-slate-700 font-medium">
+                  {selectedVisitor.instagramHandle ? (
+                    <a
+                      href={`https://instagram.com/${selectedVisitor.instagramHandle}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pink-600 hover:underline"
+                    >
+                      @{selectedVisitor.instagramHandle}
+                    </a>
+                  ) : 'N/A'}
+                </span>
+              </div>
             </div>
 
             {/* Prize summary */}

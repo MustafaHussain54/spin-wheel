@@ -21,7 +21,7 @@ function generateParticipationId() {
  */
 router.post('/register', async (req, res) => {
   try {
-    const { fullName, mobileNumber, email, company, city } = req.body;
+    const { fullName, mobileNumber, email, company, city, instagramHandle } = req.body;
 
     if (!fullName || !fullName.trim()) {
       return res.status(400).json({ success: false, message: 'Full name is required.' });
@@ -88,6 +88,9 @@ router.post('/register', async (req, res) => {
       exists = await Visitor.findOne({ participationId });
     }
 
+    // Clean Instagram Handle (remove leading @ if provided)
+    const cleanedInstagram = (instagramHandle || '').trim().replace(/^@/, '');
+
     const newVisitor = new Visitor({
       participationId,
       fullName: fullName.trim(),
@@ -95,6 +98,7 @@ router.post('/register', async (req, res) => {
       email: (email || '').trim().toLowerCase(),
       company: (company || '').trim(),
       city: (city || '').trim(),
+      instagramHandle: cleanedInstagram,
       hasSpun: false,
       registeredAt: new Date()
     });
@@ -138,6 +142,7 @@ router.get('/status/:participationId', async (req, res) => {
         mobileNumber: visitor.mobileNumber,
         company: visitor.company,
         city: visitor.city,
+        instagramHandle: visitor.instagramHandle,
         hasSpun: visitor.hasSpun,
         prizeWon: visitor.prizeWon,
         claimStatus: visitor.claimStatus,
