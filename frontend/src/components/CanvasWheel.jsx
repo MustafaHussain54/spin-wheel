@@ -101,27 +101,28 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
       ctx.fillStyle = prize.textColor || '#FFFFFF';
 
       // Contrast shadow to guarantee readability across light and dark slice colors
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-      ctx.shadowBlur = 6;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 4;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
 
-      // Available radial distance from center hub (hubRadius 48 + 15) to outer rim (radius - 12)
-      const maxAvailableWidth = radius - 75;
+      // Available radial span from center hub (hubRadius 40 + 8) to outer rim (radius - 8)
+      const maxAvailableWidth = radius - 52;
       const rawText = (prize.name || '').trim();
 
-      // Smart multi-line splitting for long prize names (e.g., "The Dining Duo – Spoon Fork Set", "Additional 1% Discount...")
+      // Smart multi-line splitting for prize names
       let lines = [];
       if (rawText.includes(' - ') || rawText.includes(' – ')) {
         const parts = rawText.split(/\s*[-–]\s*/);
-        lines = [parts[0], parts.slice(1).join(' – ')];
-      } else if (rawText.length > 20) {
-        // Break near middle on word boundary
+        lines = [parts[0].trim(), parts.slice(1).join(' – ').trim()];
+      } else if (rawText.length > 18) {
+        // Break intelligently at middle word boundary
         const words = rawText.split(' ');
         let l1 = '';
         let l2 = '';
+        const halfLen = Math.ceil(rawText.length / 2);
         for (const w of words) {
-          if ((l1 + ' ' + w).trim().length <= 18 && !l2) {
+          if (!l2 && (l1 + ' ' + w).trim().length <= halfLen + 3) {
             l1 = (l1 + ' ' + w).trim();
           } else {
             l2 = (l2 + ' ' + w).trim();
@@ -132,16 +133,15 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
         lines = [rawText];
       }
 
-      // Dynamic font sizing & auto-shrink to ensure complete visibility without clipping
+      // Large, bold font sizing for clear readability from distance
       if (lines.length > 1) {
-        let currentFontSize = totalSegments <= 6 ? 14 : totalSegments <= 8 ? 13 : 11.5;
-        ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+        let currentFontSize = totalSegments <= 6 ? 18 : totalSegments <= 8 ? 16.5 : 15;
+        ctx.font = `900 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
 
-        // Check if widest line exceeds available width, shrink if needed
         let maxLineWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
-        while (maxLineWidth > maxAvailableWidth && currentFontSize > 9) {
+        while (maxLineWidth > maxAvailableWidth && currentFontSize > 13) {
           currentFontSize -= 0.5;
-          ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+          ctx.font = `900 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
           maxLineWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
         }
 
@@ -154,16 +154,16 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
             lineToDraw = lineToDraw.slice(0, -1);
           }
           if (lineToDraw.length < line.length) lineToDraw += '..';
-          ctx.fillText(lineToDraw, radius - 14, startY + (lineIdx * lineHeight));
+          ctx.fillText(lineToDraw, radius - 8, startY + (lineIdx * lineHeight));
         });
       } else {
-        let currentFontSize = totalSegments <= 6 ? 17 : totalSegments <= 8 ? 15 : 13;
-        ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+        let currentFontSize = totalSegments <= 6 ? 20 : totalSegments <= 8 ? 18.5 : 16.5;
+        ctx.font = `900 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
 
         let measuredWidth = ctx.measureText(lines[0]).width;
-        while (measuredWidth > maxAvailableWidth && currentFontSize > 10) {
+        while (measuredWidth > maxAvailableWidth && currentFontSize > 14) {
           currentFontSize -= 0.5;
-          ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+          ctx.font = `900 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
           measuredWidth = ctx.measureText(lines[0]).width;
         }
 
@@ -173,7 +173,7 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
         }
         if (lineToDraw.length < lines[0].length) lineToDraw += '..';
 
-        ctx.fillText(lineToDraw, radius - 14, 0);
+        ctx.fillText(lineToDraw, radius - 8, 0);
       }
 
       ctx.restore();
@@ -182,20 +182,20 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
     ctx.restore();
 
     // 4. Center Corporate Brand Hub
-    const hubRadius = 48;
+    const hubRadius = 40;
     ctx.save();
 
     // Outer Hub Gold Rim with deep shadow
     ctx.beginPath();
-    ctx.arc(centerX, centerY, hubRadius + 4, 0, 2 * Math.PI);
-    const centerGrad = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, hubRadius + 4);
+    ctx.arc(centerX, centerY, hubRadius + 3, 0, 2 * Math.PI);
+    const centerGrad = ctx.createRadialGradient(centerX, centerY, 5, centerX, centerY, hubRadius + 3);
     centerGrad.addColorStop(0, '#FFFFFF');
     centerGrad.addColorStop(0.4, '#FDE68A');
     centerGrad.addColorStop(0.8, '#D97706');
     centerGrad.addColorStop(1, '#92400E');
     ctx.fillStyle = centerGrad;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 14;
     ctx.fill();
 
     // Center circular white badge for crisp logo visibility
@@ -203,15 +203,15 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
     ctx.arc(centerX, centerY, hubRadius, 0, 2 * Math.PI);
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.strokeStyle = '#D97706';
     ctx.stroke();
 
     // Draw Jaliwala Emblem perfectly centered in hub
     const logoImg = logoImgRef.current;
     if (logoImg && logoImg.complete) {
-      const imgWidth = 56;
-      const imgHeight = 63;
+      const imgWidth = 46;
+      const imgHeight = 52;
       ctx.drawImage(
         logoImg,
         centerX - imgWidth / 2,
