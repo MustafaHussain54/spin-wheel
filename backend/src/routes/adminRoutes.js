@@ -290,7 +290,7 @@ router.post('/visitors/manual', authMiddleware, async (req, res) => {
       instagramHandle: cleanedInstagram,
       hasSpun: false,
       spinCount: 0,
-      claimStatus: 'N/A',
+      claimStatus: 'Not Applicable',
       prizeWon: {
         prizeName: 'Did Not Play (Manual Entry)',
         category: 'No Prize'

@@ -77,7 +77,7 @@ const VisitorSchema = new mongoose.Schema({
   },
   claimStatus: {
     type: String,
-    enum: ['Pending', 'Claimed', 'Not Applicable'],
+    enum: ['Pending', 'Claimed', 'Not Applicable', 'N/A'],
     default: 'Pending',
     index: true
   },
