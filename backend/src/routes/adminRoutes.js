@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: admin._id, username: admin.username, role: admin.role, name: admin.name },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '30d' }
     );
 
     res.status(200).json({
@@ -233,6 +233,82 @@ router.get('/visitors', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Visitor list error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch visitors.' });
+  }
+});
+
+/**
+ * @route POST /api/admin/visitors/manual
+ * @desc Manually add a visitor who did not play the game
+ */
+router.post('/visitors/manual', authMiddleware, async (req, res) => {
+  try {
+    const { fullName, mobileNumber, email, company, city, instagramHandle, adminNotes } = req.body;
+
+    if (!fullName || !fullName.trim()) {
+      return res.status(400).json({ success: false, message: 'Full name is required.' });
+    }
+
+    if (!mobileNumber || !mobileNumber.trim()) {
+      return res.status(400).json({ success: false, message: 'Mobile number is required.' });
+    }
+
+    const cleanedMobile = mobileNumber.replace(/\D/g, '');
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(cleanedMobile)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.'
+      });
+    }
+
+    // Check duplicate
+    const existing = await Visitor.findOne({ mobileNumber: cleanedMobile });
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `A visitor with mobile number ${cleanedMobile} already exists (${existing.fullName} - ${existing.participationId}).`
+      });
+    }
+
+    // Generate unique ID
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const participationId = `MAN-${code}`;
+
+    const cleanedInstagram = (instagramHandle || '').trim().replace(/^@/, '');
+
+    const newVisitor = new Visitor({
+      participationId,
+      fullName: fullName.trim(),
+      mobileNumber: cleanedMobile,
+      email: (email || '').trim().toLowerCase(),
+      company: (company || '').trim(),
+      city: (city || '').trim(),
+      instagramHandle: cleanedInstagram,
+      hasSpun: false,
+      spinCount: 0,
+      claimStatus: 'N/A',
+      prizeWon: {
+        prizeName: 'Did Not Play (Manual Entry)',
+        category: 'No Prize'
+      },
+      adminNotes: adminNotes ? `[Manual Lead] ${adminNotes.trim()}` : '[Manual Lead Entered by Admin]',
+      registeredAt: new Date()
+    });
+
+    await newVisitor.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Visitor record successfully saved.',
+      visitor: newVisitor
+    });
+  } catch (error) {
+    console.error('Manual visitor creation error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create visitor record.' });
   }
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, CheckCircle, Clock, X, FileSpreadsheet } from 'lucide-react';
+import { Search, Filter, CheckCircle, Clock, X, FileSpreadsheet, UserPlus, Phone, User, Mail, Building, MapPin, AtSign, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 
 export default function VisitorManagement() {
@@ -18,6 +18,21 @@ export default function VisitorManagement() {
   const [selectedVisitor, setSelectedVisitor] = useState(null);
   const [claimNotes, setClaimNotes] = useState('');
   const [updatingClaim, setUpdatingClaim] = useState(false);
+
+  // Manual Visitor Entry Modal (for visitors who don't spin)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [manualForm, setManualForm] = useState({
+    fullName: '',
+    mobileNumber: '',
+    email: '',
+    company: '',
+    city: '',
+    instagramHandle: '',
+    adminNotes: ''
+  });
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualError, setManualError] = useState('');
+  const [manualSuccess, setManualSuccess] = useState('');
 
   useEffect(() => {
     fetchVisitors(1);
@@ -97,6 +112,49 @@ export default function VisitorManagement() {
     }
   };
 
+  // Manual Visitor Submission
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    setManualError('');
+    setManualSuccess('');
+
+    if (!manualForm.fullName.trim()) {
+      setManualError('Full name is required.');
+      return;
+    }
+
+    if (!manualForm.mobileNumber.trim() || manualForm.mobileNumber.replace(/\D/g, '').length !== 10) {
+      setManualError('Please provide a valid 10-digit mobile number.');
+      return;
+    }
+
+    try {
+      setManualLoading(true);
+      const res = await api.post('/admin/visitors/manual', manualForm);
+      if (res.data.success) {
+        setManualSuccess('Visitor record saved successfully!');
+        setManualForm({
+          fullName: '',
+          mobileNumber: '',
+          email: '',
+          company: '',
+          city: '',
+          instagramHandle: '',
+          adminNotes: ''
+        });
+        fetchVisitors(1);
+        setTimeout(() => {
+          setIsAddModalOpen(false);
+          setManualSuccess('');
+        }, 1200);
+      }
+    } catch (err) {
+      setManualError(err.response?.data?.message || 'Failed to save visitor.');
+    } finally {
+      setManualLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 text-slate-800">
       {/* Header & Export Action */}
@@ -108,14 +166,28 @@ export default function VisitorManagement() {
           </p>
         </div>
 
-        <button
-          onClick={handleExportExcel}
-          disabled={exporting}
-          className="flex items-center gap-2 px-4 py-2 bg-[#476379] hover:bg-[#384f61] text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
-        >
-          <FileSpreadsheet className="w-4 h-4" />
-          <span>{exporting ? 'Generating XLSX...' : 'Export to Excel'}</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => {
+              setManualError('');
+              setManualSuccess('');
+              setIsAddModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Add Visitor Lead</span>
+          </button>
+
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 bg-[#476379] hover:bg-[#384f61] text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>{exporting ? 'Generating XLSX...' : 'Export to Excel'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -383,6 +455,179 @@ export default function VisitorManagement() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Visitor Add Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xs">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-xl relative text-slate-800">
+            <button
+              onClick={() => setIsAddModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full bg-slate-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <UserPlus className="w-4 h-4" />
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">Add Visitor Lead</h2>
+            </div>
+            <p className="text-xs text-slate-500 mb-5">
+              Quickly record details for expo visitors who did not play the spin wheel game.
+            </p>
+
+            {manualError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2 text-rose-700 text-xs">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{manualError}</span>
+              </div>
+            )}
+
+            {manualSuccess && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-emerald-700 text-xs font-semibold">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{manualSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleManualSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Full Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Ramesh Patel"
+                    value={manualForm.fullName}
+                    onChange={(e) => setManualForm({ ...manualForm, fullName: e.target.value })}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Mobile Number (10 Digits) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="9876543210"
+                    value={manualForm.mobileNumber}
+                    onChange={(e) => setManualForm({ ...manualForm, mobileNumber: e.target.value.replace(/\D/g, '') })}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Company / Bakery
+                  </label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="e.g. Anand Bakers"
+                      value={manualForm.company}
+                      onChange={(e) => setManualForm({ ...manualForm, company: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    City
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="e.g. Mumbai"
+                      value={manualForm.city}
+                      onChange={(e) => setManualForm({ ...manualForm, city: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="email"
+                      placeholder="ramesh@gmail.com"
+                      value={manualForm.email}
+                      onChange={(e) => setManualForm({ ...manualForm, email: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Instagram Handle
+                  </label>
+                  <div className="relative">
+                    <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="@ramesh_bakers"
+                      value={manualForm.instagramHandle}
+                      onChange={(e) => setManualForm({ ...manualForm, instagramHandle: e.target.value })}
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1">
+                  Notes / Conversation Summary
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Met at Booth B2, interested in commercial bakery ovens..."
+                  value={manualForm.adminNotes}
+                  onChange={(e) => setManualForm({ ...manualForm, adminNotes: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#476379]"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={manualLoading}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {manualLoading ? 'Saving Lead...' : 'Save Visitor Lead'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -93,7 +93,7 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.stroke();
 
-      // Text and Icon in segment
+      // Text in segment
       ctx.save();
       ctx.rotate(angle + arcSize / 2);
       ctx.textAlign = 'right';
@@ -106,17 +106,76 @@ export default function CanvasWheel({ prizes, rotation, isSpinning }) {
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
 
-      // Dynamic font sizing based on total segment count
-      const fontSize = totalSegments <= 6 ? 19 : totalSegments <= 8 ? 17 : 15;
-      ctx.font = `800 ${fontSize}px Inter, -apple-system, system-ui, sans-serif`;
+      // Available radial distance from center hub (hubRadius 48 + 15) to outer rim (radius - 12)
+      const maxAvailableWidth = radius - 75;
+      const rawText = (prize.name || '').trim();
 
-      // Truncate name if too long
-      let text = prize.name;
-      if (text.length > 22) {
-        text = text.substring(0, 20) + '...';
+      // Smart multi-line splitting for long prize names (e.g., "The Dining Duo – Spoon Fork Set", "Additional 1% Discount...")
+      let lines = [];
+      if (rawText.includes(' - ') || rawText.includes(' – ')) {
+        const parts = rawText.split(/\s*[-–]\s*/);
+        lines = [parts[0], parts.slice(1).join(' – ')];
+      } else if (rawText.length > 20) {
+        // Break near middle on word boundary
+        const words = rawText.split(' ');
+        let l1 = '';
+        let l2 = '';
+        for (const w of words) {
+          if ((l1 + ' ' + w).trim().length <= 18 && !l2) {
+            l1 = (l1 + ' ' + w).trim();
+          } else {
+            l2 = (l2 + ' ' + w).trim();
+          }
+        }
+        lines = l2 ? [l1, l2] : [l1];
+      } else {
+        lines = [rawText];
       }
 
-      ctx.fillText(text, radius - 20, 0);
+      // Dynamic font sizing & auto-shrink to ensure complete visibility without clipping
+      if (lines.length > 1) {
+        let currentFontSize = totalSegments <= 6 ? 14 : totalSegments <= 8 ? 13 : 11.5;
+        ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+
+        // Check if widest line exceeds available width, shrink if needed
+        let maxLineWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+        while (maxLineWidth > maxAvailableWidth && currentFontSize > 9) {
+          currentFontSize -= 0.5;
+          ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+          maxLineWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+        }
+
+        const lineHeight = currentFontSize * 1.25;
+        const startY = -((lines.length - 1) * lineHeight) / 2;
+
+        lines.forEach((line, lineIdx) => {
+          let lineToDraw = line;
+          while (ctx.measureText(lineToDraw).width > maxAvailableWidth && lineToDraw.length > 4) {
+            lineToDraw = lineToDraw.slice(0, -1);
+          }
+          if (lineToDraw.length < line.length) lineToDraw += '..';
+          ctx.fillText(lineToDraw, radius - 14, startY + (lineIdx * lineHeight));
+        });
+      } else {
+        let currentFontSize = totalSegments <= 6 ? 17 : totalSegments <= 8 ? 15 : 13;
+        ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+
+        let measuredWidth = ctx.measureText(lines[0]).width;
+        while (measuredWidth > maxAvailableWidth && currentFontSize > 10) {
+          currentFontSize -= 0.5;
+          ctx.font = `800 ${currentFontSize}px Inter, -apple-system, system-ui, sans-serif`;
+          measuredWidth = ctx.measureText(lines[0]).width;
+        }
+
+        let lineToDraw = lines[0];
+        while (ctx.measureText(lineToDraw).width > maxAvailableWidth && lineToDraw.length > 4) {
+          lineToDraw = lineToDraw.slice(0, -1);
+        }
+        if (lineToDraw.length < lines[0].length) lineToDraw += '..';
+
+        ctx.fillText(lineToDraw, radius - 14, 0);
+      }
+
       ctx.restore();
     }
 
