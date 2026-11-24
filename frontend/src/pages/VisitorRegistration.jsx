@@ -312,8 +312,8 @@ export default function VisitorRegistration() {
 
       {/* Admin Quick Link */}
       <div className="mt-5 text-center text-xs text-slate-400 z-10">
-        <a href="/admin/login" className="hover:text-slate-700 transition-colors underline">
-          Admin Login Portal
+        <a href="/admin/dashboard" className="hover:text-slate-700 transition-colors underline">
+          Admin Portal
         </a>
       </div>
     </div>

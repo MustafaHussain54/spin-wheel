@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
@@ -8,6 +8,14 @@ export default function AdminLogin() {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // If already logged in, redirect directly to dashboard without asking password again
+  useEffect(() => {
+    const token = localStorage.getItem('expo_admin_token');
+    if (token) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setCredentials(prev => ({ ...prev, [e.target.name]: e.target.value }));
